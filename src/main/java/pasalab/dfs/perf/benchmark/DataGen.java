@@ -20,9 +20,7 @@ public class DataGen {
   private long mXorIfLessThan;
   
   private ByteBuffer[] mChunksAsBytes = new ByteBuffer[kNumChunks];
-  private long[][] mChunksAsLongs = new long[kNumChunks][];
   private ByteBuffer mTmpBufAsBytes;
-  private long[] mTmpBufAsLongs;
 
   // mWriteBuf is only used temporarily, but we allocate it here
   // to minimize allocate/GC overhead.
@@ -176,15 +174,15 @@ public class DataGen {
     
     for (int j = 0; j < kNumChunks; ++j) {
       mChunksAsBytes[j] = ByteBuffer.allocate(kChunkSize);
-      mChunksAsLongs[j] = mChunksAsBytes[j].asLongBuffer().array();
       // Initialize with random bytes
       for (int k = 0; k < kChunkSize; ++k) {
         mChunksAsBytes[j].put((byte)mRand.nextInt());
       }
+      mChunksAsBytes[j].limit(kChunkSize);
     }
     
     mTmpBufAsBytes = ByteBuffer.allocate(kChunkSize);
-    mTmpBufAsLongs = mTmpBufAsBytes.asLongBuffer().array();
+    mTmpBufAsBytes.limit(kChunkSize);
   }  
   
   /**
@@ -208,13 +206,16 @@ public class DataGen {
         long xorValue0 = mXorValues[(int)r & kNumXorMask];
         long xorValue1 = mXorValues[(int)(r >> 16) & kNumXorMask];
         long xorValue = (xorValue0 ^ xorValue1);
-        long[] chunk = mChunksAsLongs[dictIdx];
+        ByteBuffer chunk = mChunksAsBytes[dictIdx];
         for (int j = 0; j < kChunkQuads; ++j) {
-          mTmpBufAsLongs[j] = (chunk[j] ^ xorValue);
+          long val = chunk.getLong(8*j);
+          mTmpBufAsBytes.putLong(8*j, (val ^ xorValue));
         }
+        mTmpBufAsBytes.position(0);
         mTmpBufAsBytes.get(dstBuf, idx, n);
       } else {
         // Use the chunk without xor'ing
+        mChunksAsBytes[dictIdx].position(0);
         mChunksAsBytes[dictIdx].get(dstBuf, idx, n);
       }
       pos += n;
@@ -243,7 +244,7 @@ public class DataGen {
    * Benchmark the speed of generating random data
    */
   public double benchmarkSpeedMBPerSec() {
-    int numMB = 1024;
+    int numMB = 8192;
     int bufSize = (1024*1024);
     byte[] buf = new byte[bufSize];
     long t0 = System.currentTimeMillis();    

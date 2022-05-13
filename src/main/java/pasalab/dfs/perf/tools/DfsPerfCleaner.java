@@ -1,5 +1,7 @@
 package pasalab.dfs.perf.tools;
 
+import pasalab.dfs.perf.benchmark.DataGen;
+
 import java.io.IOException;
 
 import pasalab.dfs.perf.conf.PerfConf;
@@ -19,5 +21,10 @@ public class DfsPerfCleaner {
     }
     System.out.println("Clean the workspace " + PerfConf.get().DFS_DIR + " on "
         + PerfConf.get().DFS_ADDRESS);
+    
+    DataGen dataGen = new DataGen("lz4", 2.0, 0xab583c);
+    System.out.format("Testing ...%n");
+    double speed = dataGen.benchmarkSpeedMBPerSec();
+    System.out.format("Speed %f MB/s%n", speed);           
   }
 }
