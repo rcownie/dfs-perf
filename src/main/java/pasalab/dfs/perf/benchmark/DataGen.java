@@ -1,6 +1,6 @@
 package pasalab.dfs.perf.benchmark;
 
-import java.io.ByteBuffer;
+import java.nio.*;
 import java.io.IOException;
 import java.io.OutputStream;
 import java.util.Random;
@@ -9,6 +9,7 @@ public class DataGen {
   private final int kNumChunks = 16;
   private final int kNumChunksMask = (kNumChunks - 1);
   private final int kChunkQuads = (128/8);
+  private final int kChunkSize = (kChunkQuads * 8);
   private final int kNumXorValues = (16*1024);
   private final int kNumXorMask = (kNumXorValues - 1);
   
@@ -18,10 +19,15 @@ public class DataGen {
   private long[] mXorValues;
   private long mXorIfLessThan;
   
-  private ByteBuffer[] mChunksAsBytes;
-  private ByteBuffer[] mChunksAsLongs;
+  private ByteBuffer[] mChunksAsBytes = new ByteBuffer[kNumChunks];
+  private long[][] mChunksAsLongs = new long[kNumChunks][];
   private ByteBuffer mTmpBufAsBytes;
-  private LongBuffer mTmpBufAsLongs;
+  private long[] mTmpBufAsLongs;
+
+  // mWriteBuf is only used temporarily, but we allocate it here
+  // to minimize allocate/GC overhead.
+  private final int kWriteBufSize = (256*1024);
+  private byte[] mWriteBuf = new byte[kWriteBufSize];
   
   /* Map from compressFactor to fraction of probably-repeated chunks */
   private static double[][] lz4_table = {
@@ -166,29 +172,25 @@ public class DataGen {
     // Pick mXorIfLessThan such that (random() & 0x0fffff < mXorIfLessThan) is true
     // with probability (1.0 - repeatFraction)
     double xorFraction = (1.0 - repeatFraction);
-    mXorIfLessThan = (xorFraction * 0x100000);
+    mXorIfLessThan = (long)(xorFraction * 0x100000);
     
-    mChunksAsBytes = new ByteBuffer[kNumChunks];
-    mChunksAsLongs = new LongBuffer[kNumChunks];
     for (int j = 0; j < kNumChunks; ++j) {
-      mChunksAsBytes[j] = new ByteBuffer(kChunkSize);
-      mChunksAsLongs[j] = mChunksAsBytes[j].asLongBuffer();
+      mChunksAsBytes[j] = ByteBuffer.allocate(kChunkSize);
+      mChunksAsLongs[j] = mChunksAsBytes[j].asLongBuffer().array();
       // Initialize with random bytes
       for (int k = 0; k < kChunkSize; ++k) {
-        mChunksAsBytes[j][k] = mRand.nextByte();
+        mChunksAsBytes[j].put((byte)mRand.nextInt());
       }
     }
     
-    // The mTmpBuf is only used temporarily in generateRandomDataToBuffer,
-    // but we allocate it once here to get less allocation and GC overhead.
-    mTmpBufAsBytes = new ByteBuffer(kChunkSize);
-    mTmpBufAsLongs = mTmpBufAsBytes.asLongBuffer();
+    mTmpBufAsBytes = ByteBuffer.allocate(kChunkSize);
+    mTmpBufAsLongs = mTmpBufAsBytes.asLongBuffer().array();
   }  
   
   /**
    * Generate random data into a byte array
    */
-  public generateRandomDataToBuffer(byte[] dstBuf, int idx, int numBytes) {
+  public void generateRandomDataToBuffer(byte[] dstBuf, int idx, int numBytes) {
     int pos = 0;
     while (pos < numBytes) {
       int n = (numBytes - pos);
@@ -196,17 +198,17 @@ public class DataGen {
         n = kChunkSize;
       }
       long r = mRand.nextLong();
-      long dictIdx = (r & kNumChunksMask);
+      int dictIdx = (int)(r & kNumChunksMask);
       r = (r >> 4);
-      long xorChoice = (r & 0xfffff);
+      int xorChoice = (int)(r & 0xfffff);
       r = (r >> 20);
       
-      if (xorChoice < mXorFraction) {
+      if (xorChoice < mXorIfLessThan) {
         // Use the chunk xor'ed with a somewhat-random xorValue
-        long xorValue0 = xorValues[r & kXorValueMask];
-        long xorValue1 = xorValues[(r >> 16) & kXorValueMask];
+        long xorValue0 = mXorValues[(int)r & kNumXorMask];
+        long xorValue1 = mXorValues[(int)(r >> 16) & kNumXorMask];
         long xorValue = (xorValue0 ^ xorValue1);
-        LongBuffer chunk = mChunksAsLongs[dictIdx];
+        long[] chunk = mChunksAsLongs[dictIdx];
         for (int j = 0; j < kChunkQuads; ++j) {
           mTmpBufAsLongs[j] = (chunk[j] ^ xorValue);
         }
@@ -222,17 +224,17 @@ public class DataGen {
   /**
    * Generate random data into a stream
    */
-  public generateRandomDataToStream(OutputStream dstStream, long numBytes) {
-    long bufSize = (256*1024);
-    byte[bufSize] buf;
-    
-    for (long remnant = numBytes; remnant > 0;) {
-      long n = remnant;
-      if (n > bufSize) {
-        n = bufSize;
+  public void generateRandomDataToStream(OutputStream dstStream, int numBytes) {
+    for (int remnant = numBytes; remnant > 0;) {
+      int n = remnant;
+      if (n > kWriteBufSize) {
+        n = kWriteBufSize;
       }
-      generateRandomDataToBuffer(buf, n);
-      dstStream.write(buf, 0, n)
+      generateRandomDataToBuffer(mWriteBuf, 0, n);
+      try {
+        dstStream.write(mWriteBuf, 0, n);
+      } catch (IOException e) {
+      }
       remnant -= n;
     }
   }
@@ -241,12 +243,12 @@ public class DataGen {
    * Benchmark the speed of generating random data
    */
   public double benchmarkSpeedMBPerSec() {
-    long numMB = 1024;
-    long bufSize = (1024*1024);
-    byte[bufSize] buf;
+    int numMB = 1024;
+    int bufSize = (1024*1024);
+    byte[] buf = new byte[bufSize];
     long t0 = System.currentTimeMillis();    
-    for (long j = 0; j < numMB; ++j) {
-      generateRandomDataToBuffer(buf, bufSize);
+    for (int j = 0; j < numMB; ++j) {
+      generateRandomDataToBuffer(buf, 0, bufSize);
     }
     long elapsed = (System.currentTimeMillis() - t0);
     return ((numMB*1000.0) / elapsed);
