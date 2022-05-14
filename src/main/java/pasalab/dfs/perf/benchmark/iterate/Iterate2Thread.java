@@ -25,7 +25,7 @@ public class Iterate2Thread extends IterateThread {
     for (int w = 0; w < mWriteFilesNum; w ++) {
       try {
         String fileName = mTaskId + "-" + mId + "-" + w;
-        Operators.writeSingleFile(mFileSystem, dataDir + "/" + fileName, mFileLength, mBufferSize);
+        Operators.writeSingleFile(mFileSystem, dataDir + "/" + fileName, mFileLength, mDataGen);
         // writeBytes += mFileLength;
       } catch (IOException e) {
         LOG.error("Failed to write file", e);
@@ -64,7 +64,7 @@ public class Iterate2Thread extends IterateThread {
       smallFilePath = mWorkDir + "/small-data/" + mTaskId + "-" + mId + "-" + i;
       tTimeMs = System.currentTimeMillis();
       try {
-        Operators.writeSingleFile(mFileSystem, smallFilePath, mFileLength, mBufferSize);
+        Operators.writeSingleFile(mFileSystem, smallFilePath, mFileLength, mDataGen);
         writeBytes += mFileLength;
       } catch (IOException e) {
         LOG.error("Failed to write file", e);

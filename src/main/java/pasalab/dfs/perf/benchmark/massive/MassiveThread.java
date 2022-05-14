@@ -80,7 +80,7 @@ public class MassiveThread extends PerfThread {
     for (int b = 0; b < mBasicFilesNum; b ++) {
       try {
         String fileName = mTaskId + "-" + mId + "-" + b;
-        Operators.writeSingleFile(mFileSystem, dataDir + "/" + fileName, mFileLength, mBufferSize);
+        Operators.writeSingleFile(mFileSystem, dataDir + "/" + fileName, mFileLength, mDataGen);
         basicBytes += mFileLength;
       } catch (IOException e) {
         LOG.error("Failed to write basic file", e);
@@ -114,7 +114,7 @@ public class MassiveThread extends PerfThread {
         try {
           String writeFileName = mTaskId + "-" + mId + "--" + index;
           Operators.writeSingleFile(mFileSystem, tmpDir + "/" + writeFileName, mFileLength,
-              mBufferSize);
+            mDataGen);
           writeBytes += mFileLength;
           mFileSystem.rename(tmpDir + "/" + writeFileName, dataDir + "/" + writeFileName);
         } catch (IOException e) {

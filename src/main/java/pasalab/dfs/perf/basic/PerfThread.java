@@ -3,6 +3,7 @@ package pasalab.dfs.perf.basic;
 import org.apache.log4j.Logger;
 
 import pasalab.dfs.perf.PerfConstants;
+import pasalab.dfs.perf.benchmark.DataGen;
 
 public abstract class PerfThread implements Runnable {
   protected static final Logger LOG = Logger.getLogger(PerfConstants.PERF_LOGGER_TYPE);
@@ -11,6 +12,7 @@ public abstract class PerfThread implements Runnable {
   protected String mNodeName;
   protected int mTaskId;
   protected String mTestCase;
+  protected DataGen mDataGen;
 
   public void initialSet(int threadId, int taskId, String nodeName, String testCase) {
     mId = threadId;

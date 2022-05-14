@@ -75,7 +75,7 @@ public class IterateThread extends PerfThread {
         try {
           String fileName = mTaskId + "-" + mId + "-" + w;
           Operators
-              .writeSingleFile(mFileSystem, dataDir + "/" + fileName, mFileLength, mBufferSize);
+              .writeSingleFile(mFileSystem, dataDir + "/" + fileName, mFileLength, mDataGen);
           writeBytes += mFileLength;
         } catch (IOException e) {
           LOG.error("Failed to write file", e);

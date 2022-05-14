@@ -3,6 +3,7 @@ package pasalab.dfs.perf.benchmark;
 import java.nio.*;
 import java.io.IOException;
 import java.io.OutputStream;
+import java.io.FileOutputStream;
 import java.util.Random;
 
 public class DataGen {
@@ -27,102 +28,44 @@ public class DataGen {
   private final int kWriteBufSize = (256*1024);
   private byte[] mWriteBuf = new byte[kWriteBufSize];
   
-  /* Map from compressFactor to fraction of probably-repeated chunks */
+  /*
+   * Map from compressFactor to fraction of probably-repeated chunks
+   *
+   * This calibrates the actual compression ratio found from
+   * using lz4 to compress files generated with different xorFraction.
+   */  
   private static double[][] lz4_table = {
-    { 1.000, 0.00 },
-    { 1.001, 0.07 },
-    { 1.002, 0.08 },
-    { 1.006, 0.09 },
-    { 1.013, 0.10 },
-    { 1.018, 0.11 },
-    { 1.025, 0.12 },
-    { 1.033, 0.13 },
-    { 1.039, 0.14 },
-    { 1.048, 0.15 },
-    { 1.056, 0.16 },
-    { 1.064, 0.17 },
-    { 1.073, 0.18 },
-    { 1.081, 0.19 },
-    { 1.093, 0.20 },
-    { 1.100, 0.21 },
-    { 1.112, 0.22 },
-    { 1.123, 0.23 },
-    { 1.132, 0.24 },
-    { 1.141, 0.25 },
-    { 1.154, 0.26 },
-    { 1.168, 0.27 },
-    { 1.180, 0.28 },
-    { 1.189, 0.29 },
-    { 1.206, 0.30 },
-    { 1.218, 0.31 },
-    { 1.231, 0.32 },
-    { 1.244, 0.33 },
-    { 1.259, 0.34 },
-    { 1.275, 0.35 },
-    { 1.289, 0.36 },
-    { 1.304, 0.37 },
-    { 1.320, 0.38 },
-    { 1.339, 0.39 },
-    { 1.354, 0.40 },
-    { 1.376, 0.41 },
-    { 1.393, 0.42 },
-    { 1.411, 0.43 },
-    { 1.433, 0.44 },
-    { 1.453, 0.45 },
-    { 1.477, 0.46 },
-    { 1.498, 0.47 },
-    { 1.514, 0.48 },
-    { 1.539, 0.49 },
-    { 1.559, 0.50 },
-    { 1.592, 0.51 },
-    { 1.613, 0.52 },
-    { 1.638, 0.53 },
-    { 1.665, 0.54 },
-    { 1.695, 0.55 },
-    { 1.726, 0.56 },
-    { 1.748, 0.57 },
-    { 1.790, 0.58 },
-    { 1.816, 0.59 },
-    { 1.852, 0.60 },
-    { 1.885, 0.61 },
-    { 1.919, 0.62 },
-    { 1.968, 0.63 },
-    { 2.011, 0.64 },
-    { 2.051, 0.65 },
-    { 2.095, 0.66 },
-    { 2.144, 0.67 },
-    { 2.197, 0.68 },
-    { 2.232, 0.69 },
-    { 2.285, 0.70 },
-    { 2.329, 0.71 },
-    { 2.390, 0.72 },
-    { 2.468, 0.73 },
-    { 2.537, 0.74 },
-    { 2.583, 0.75 },
-    { 2.662, 0.76 },
-    { 2.733, 0.77 },
-    { 2.823, 0.78 },
-    { 2.907, 0.79 },
-    { 2.986, 0.80 },
-    { 3.100, 0.81 },
-    { 3.199, 0.82 },
-    { 3.303, 0.83 },
-    { 3.420, 0.84 },
-    { 3.552, 0.85 },
-    { 3.686, 0.86 },
-    { 3.856, 0.87 },
-    { 4.011, 0.88 },
-    { 4.189, 0.89 },
-    { 4.420, 0.90 },
-    { 4.618, 0.91 },
-    { 4.897, 0.92 },
-    { 5.160, 0.93 },
-    { 5.543, 0.94 },
-    { 5.893, 0.95 },
-    { 6.417, 0.96 },
-    { 6.964, 0.97 },
-    { 7.726, 0.98 },
-    { 8.787, 0.99 },
+    { 1.000, 1.000 },
+    { 1.199, 0.790 },
+    { 1.336, 0.704 },
+    { 1.476, 0.633 },
+    { 1.612, 0.576 },
+    { 1.746, 0.529 },
+    { 1.886, 0.486 },
+    { 2.035, 0.448 },
+    { 2.177, 0.416 },
+    { 2.338, 0.386 },
+    { 2.470, 0.363 },
+    { 2.627, 0.339 },
+    { 2.767, 0.319 },
+    { 2.955, 0.297 },
+    { 3.117, 0.279 },
+    { 3.256, 0.265 },
+    { 3.460, 0.248 },
+    { 3.628, 0.235 },
+    { 3.800, 0.223 },
+    { 3.980, 0.211 },
+    { 4.172, 0.199 },
+    { 5.151, 0.154 },
+    { 6.207, 0.121 },
+    { 7.442, 0.096 },
+    { 8.783, 0.076 },
+    { 10.187, 0.061 },
+    { 11.900, 0.048 },
+    { 13.603, 0.038 },
+    { 15.609, 0.030 },
+    { 17.556, 0.023 },
+    { 19.692, 0.017 },
   };
   
   /**
@@ -147,36 +90,44 @@ public class DataGen {
     /*
      * Do table lookup with linear interpolation
      */
-    double repeatFraction = 0.00;
+    double xorFraction = 0.0;
 
     double maxCompressFactor = lz4_table[lz4_table.length-1][0];
     if (compressFactor >= maxCompressFactor) {
        /* do the best we can */
-       repeatFraction = 1.00;
+       xorFraction = 0.0;
     } else {
       for (int j = 1; j < lz4_table.length; ++j) {
         double factorA = lz4_table[j-1][0];
         double factorB = lz4_table[j][0];
+        System.out.format("DEBUG: compressFactor %f factorA %f factorB %f%n",
+          compressFactor, factorA, factorB);
         if ((factorA <= compressFactor) && (compressFactor < factorB)) {
           // Linear interpolation of repeatFactor
           double mix = ((compressFactor - factorA) / (factorB - factorA));
-          double repeatA = lz4_table[j-1][1];
-          double repeatB = lz4_table[j][1];
-          repeatFraction = (repeatA + (mix * (repeatB-repeatA)));
+          double xorA = lz4_table[j-1][1];
+          double xorB = lz4_table[j][1];
+          xorFraction = (xorA + (mix * (xorB-xorA)));
+          System.out.format("DEBUG: xorA %f xorB %f mix %f xorFraction %f%n",
+            xorA, xorB, mix, xorFraction);
           break;
         }
       }
     }
     // Pick mXorIfLessThan such that (random() & 0x0fffff < mXorIfLessThan) is true
-    // with probability (1.0 - repeatFraction)
-    double xorFraction = (1.0 - repeatFraction);
+    // with probability xorFraction
     mXorIfLessThan = (long)(xorFraction * 0x100000);
+    
+    System.out.format("DEBUG: compressFactor %f xorFraction %f xorIfLessThan %d%n",
+      compressFactor,
+      xorFraction,
+      mXorIfLessThan);
     
     for (int j = 0; j < kNumChunks; ++j) {
       mChunksAsBytes[j] = ByteBuffer.allocate(kChunkSize);
       // Initialize with random bytes
       for (int k = 0; k < kChunkSize; ++k) {
-        mChunksAsBytes[j].put((byte)mRand.nextInt());
+        mChunksAsBytes[j].put(k, (byte)mRand.nextInt());
       }
       mChunksAsBytes[j].limit(kChunkSize);
     }
@@ -206,17 +157,20 @@ public class DataGen {
         long xorValue0 = mXorValues[(int)r & kNumXorMask];
         long xorValue1 = mXorValues[(int)(r >> 16) & kNumXorMask];
         long xorValue = (xorValue0 ^ xorValue1);
+        //System.out.format("DEBUG: dictIdx 0x%x xorValue 0x%x%n", dictIdx, xorValue);
         ByteBuffer chunk = mChunksAsBytes[dictIdx];
         for (int j = 0; j < kChunkQuads; ++j) {
           long val = chunk.getLong(8*j);
+          //System.out.format("  [0x%02x] 0x%x%n", 8*j, val^xorValue);
           mTmpBufAsBytes.putLong(8*j, (val ^ xorValue));
         }
         mTmpBufAsBytes.position(0);
-        mTmpBufAsBytes.get(dstBuf, idx, n);
+        mTmpBufAsBytes.get(dstBuf, idx+pos, n);
       } else {
         // Use the chunk without xor'ing
+        //System.out.format("DEBUG: dictIdx 0x%x%n", dictIdx);
         mChunksAsBytes[dictIdx].position(0);
-        mChunksAsBytes[dictIdx].get(dstBuf, idx, n);
+        mChunksAsBytes[dictIdx].get(dstBuf, idx+pos, n);
       }
       pos += n;
     }
@@ -243,10 +197,18 @@ public class DataGen {
   /**
    * Benchmark the speed of generating random data
    */
-  public double benchmarkSpeedMBPerSec() {
-    int numMB = 8192;
+  public double benchmarkSpeedMBPerSec(String fileName) {
+    int numMB = 1024;
     int bufSize = (1024*1024);
     byte[] buf = new byte[bufSize];
+
+    try {
+      FileOutputStream out = new FileOutputStream(fileName);
+      generateRandomDataToStream(out, 8*1024*1024);
+      out.close();
+    } catch (IOException e) {
+    }
+    
     long t0 = System.currentTimeMillis();    
     for (int j = 0; j < numMB; ++j) {
       generateRandomDataToBuffer(buf, 0, bufSize);

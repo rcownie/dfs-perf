@@ -33,7 +33,7 @@ public class SimpleWriteThread extends PerfThread {
     mSuccess = true;
     for (String fileName : mWriteFiles) {
       try {
-        Operators.writeSingleFile(mFileSystem, fileName, mFileLength, mBufferSize);
+        Operators.writeSingleFile(mFileSystem, fileName, mFileLength, mDataGen);
         writeBytes += mFileLength;
       } catch (IOException e) {
         LOG.error("Failed to write file " + fileName, e);

@@ -211,19 +211,6 @@ public class Operators {
     return readLen;
   }
 
-  private static void writeContentToFile(OutputStream os, long fileSize, int bufferSize)
-      throws IOException {
-    byte[] content = new byte[bufferSize];
-    long remain = fileSize;
-    while (remain >= bufferSize) {
-      os.write(content);
-      remain -= bufferSize;
-    }
-    if (remain > 0) {
-      os.write(content, 0, (int) remain);
-    }
-  }
-
   /**
    * Create a file and write to it.
    * 
@@ -234,9 +221,16 @@ public class Operators {
    * @throws IOException
    */
   public static void writeSingleFile(PerfFileSystem fs, String filePath, long fileSize,
-      int bufferSize) throws IOException {
+      DataGen dataGen) throws IOException {
     OutputStream os = fs.getOutputStream(filePath);
-    writeContentToFile(os, fileSize, bufferSize);
+    for (long pos = 0; pos < fileSize;) {
+      long n = (fileSize - pos);
+      if (n > 1024*1024*1024) {
+        n = 1024*1024*1024;
+      }
+      dataGen.generateRandomDataToStream(os, (int)n);
+      pos += n;
+    }
     os.close();
   }
 }
