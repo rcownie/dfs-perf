@@ -11,6 +11,11 @@
     <description>the block size of a file</description>
   </property>
   <property>
+      <name>file.compression.factor</name>
+      <value>1.00</value>
+      <description>compressibility of generated file data</description>
+  </property>
+  <property>
     <name>file.length.bytes</name>
     <value>134217728</value>
     <description>the file size of write test, in bytes</description>

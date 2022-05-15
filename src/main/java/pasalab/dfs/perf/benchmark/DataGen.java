@@ -25,8 +25,8 @@ public class DataGen {
 
   // mWriteBuf is only used temporarily, but we allocate it here
   // to minimize allocate/GC overhead.
-  private final int kWriteBufSize = (256*1024);
-  private byte[] mWriteBuf = new byte[kWriteBufSize];
+  private int mWriteBufSize;
+  private byte[] mWriteBuf;
   
   /*
    * Map from compressFactor to fraction of probably-repeated chunks
@@ -36,7 +36,8 @@ public class DataGen {
    */  
   private static double[][] lz4_table = {
     { 1.000, 1.000 },
-    { 1.199, 0.790 },
+    { 1.070, 0.894 },
+    { 1.199, 0.789 },
     { 1.336, 0.704 },
     { 1.476, 0.633 },
     { 1.612, 0.576 },
@@ -75,7 +76,7 @@ public class DataGen {
    * @param compressFactor desired factor of compression with that algorithm
    * @param seed to initialize random-number generator
    */
-  public DataGen(String compressType, double compressFactor, long seed) {
+  public DataGen(String compressType, double compressFactor, long seed, long bufferSize) {
     assert(compressType == "lz4");
     mRand = new Random(seed);
     mXorPos = 0;
@@ -134,6 +135,12 @@ public class DataGen {
     
     mTmpBufAsBytes = ByteBuffer.allocate(kChunkSize);
     mTmpBufAsBytes.limit(kChunkSize);
+ 
+    if (bufferSize > 64*1024*1024) {
+      bufferSize = 64*1024*1024;
+    }
+    mWriteBufSize = (int)bufferSize;
+    mWriteBuf = new byte[mWriteBufSize];
   }  
   
   /**
@@ -182,8 +189,8 @@ public class DataGen {
   public void generateRandomDataToStream(OutputStream dstStream, int numBytes) {
     for (int remnant = numBytes; remnant > 0;) {
       int n = remnant;
-      if (n > kWriteBufSize) {
-        n = kWriteBufSize;
+      if (n > mWriteBufSize) {
+        n = mWriteBufSize;
       }
       generateRandomDataToBuffer(mWriteBuf, 0, n);
       try {

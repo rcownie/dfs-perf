@@ -6,6 +6,7 @@ import java.util.Random;
 
 import pasalab.dfs.perf.basic.PerfThread;
 import pasalab.dfs.perf.basic.TaskConfiguration;
+import pasalab.dfs.perf.benchmark.DataGen;
 import pasalab.dfs.perf.benchmark.ListGenerator;
 import pasalab.dfs.perf.benchmark.Operators;
 import pasalab.dfs.perf.conf.PerfConf;
@@ -139,6 +140,8 @@ public class MixtureThread extends PerfThread {
     mReadFilesNum = taskConf.getIntProperty("read.files.per.thread");
     mWorkDir = taskConf.getProperty("work.dir");
     mWriteFilesNum = taskConf.getIntProperty("write.files.per.thread");
+    mDataGen = new DataGen("lz4", taskConf.getDoubleProperty("file.compression.factor"),
+      System.currentTimeMillis(), mBufferSize);
     try {
       mFileSystem = Operators.connect(PerfConf.get().DFS_ADDRESS, taskConf);
       initSyncBarrier();

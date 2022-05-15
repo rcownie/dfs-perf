@@ -5,6 +5,7 @@ import java.util.List;
 
 import pasalab.dfs.perf.basic.PerfThread;
 import pasalab.dfs.perf.basic.TaskConfiguration;
+import pasalab.dfs.perf.benchmark.DataGen;
 import pasalab.dfs.perf.benchmark.ListGenerator;
 import pasalab.dfs.perf.benchmark.Operators;
 import pasalab.dfs.perf.conf.PerfConf;
@@ -48,6 +49,8 @@ public class SimpleWriteThread extends PerfThread {
   public boolean setupThread(TaskConfiguration taskConf) {
     mBufferSize = taskConf.getIntProperty("buffer.size.bytes");
     mFileLength = taskConf.getLongProperty("file.length.bytes");
+    mDataGen = new DataGen("lz4", taskConf.getDoubleProperty("file.compression.factor"),
+      System.currentTimeMillis(), mBufferSize);
     try {
       mFileSystem = Operators.connect(PerfConf.get().DFS_ADDRESS, taskConf);
       String writeDir = taskConf.getProperty("write.dir");

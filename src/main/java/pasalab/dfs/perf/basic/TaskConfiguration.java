@@ -18,6 +18,7 @@ import pasalab.dfs.perf.util.SAXConfiguration;
 public class TaskConfiguration {
   private static final Logger LOG = Logger.getLogger("");
   public static final boolean DEFAULT_BOOLEAN = false;
+  public static final double DEFAULT_DOUBLE = 0.0;
   public static final int DEFAULT_INTEGER = 0;
   public static final long DEFAULT_LONG = 0;
   public static final String DEFAULT_STRING = "";
@@ -80,6 +81,13 @@ public class TaskConfiguration {
       return Boolean.valueOf(mProperties.get(property));
     }
     return DEFAULT_BOOLEAN;
+  }
+
+  public synchronized double getDoubleProperty(String property) {
+    if (mProperties.containsKey(property)) {
+      return Double.valueOf(mProperties.get(property));
+    }
+    return DEFAULT_DOUBLE;
   }
 
   public synchronized int getIntProperty(String property) {
