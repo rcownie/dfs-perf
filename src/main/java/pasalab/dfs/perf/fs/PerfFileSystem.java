@@ -25,6 +25,8 @@ public abstract class PerfFileSystem {
       return PerfFileSystemAlluxioFS.getClient(path, taskConf);
     } else if (isTfsHadoop(path)) {
       return PerfFileSystemAlluxioHadoop.getClient(path, taskConf);
+    } else if (isFlexfs(path)) {
+      return PerfFileSystemFlexfs.getClient(path, taskConf);
     }
     throw new IOException("Unknown file system scheme " + path);
   }
@@ -67,6 +69,15 @@ public abstract class PerfFileSystem {
 
   private static boolean isTfsHadoop(final String path) {
     for (final String prefix : DfsConf.get().ALLUXIO_HADOOP_PREFIX) {
+      if (path.startsWith(prefix)) {
+        return true;
+      }
+    }
+    return false;
+  }
+
+  private static boolean isFlexfs(final String path) {
+    for (final String prefix : DfsConf.get().FLEXFS_PREFIX) {
       if (path.startsWith(prefix)) {
         return true;
       }
