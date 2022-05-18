@@ -5,10 +5,14 @@ import java.io.InputStream;
 import java.io.OutputStream;
 import java.util.Random;
 
+import org.apache.log4j.Logger;
+
 import pasalab.dfs.perf.basic.TaskConfiguration;
 import pasalab.dfs.perf.fs.PerfFileSystem;
 
 public class Operators {
+  private static final Logger LOG = Logger.getLogger("Operators");
+
   private static final Random RAND = new Random(System.currentTimeMillis());
 
   /**

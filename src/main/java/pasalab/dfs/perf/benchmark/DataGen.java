@@ -6,7 +6,11 @@ import java.io.OutputStream;
 import java.io.FileOutputStream;
 import java.util.Random;
 
+import org.apache.log4j.Logger;
+
 public class DataGen {
+  private static final Logger LOG = Logger.getLogger("DataGen1");
+
   private final int kNumChunks = 16;
   private final int kNumChunksMask = (kNumChunks - 1);
   private final int kChunkQuads = (128/8);
@@ -186,18 +190,20 @@ public class DataGen {
   /**
    * Generate random data into a stream
    */
-  public void generateRandomDataToStream(OutputStream dstStream, int numBytes) {
-    for (int remnant = numBytes; remnant > 0;) {
-      int n = remnant;
+  public void generateRandomDataToStream(OutputStream dstStream, long numBytes) {
+    for (long pos = 0; pos < numBytes;) {
+      long n = (numBytes - pos);
       if (n > mWriteBufSize) {
         n = mWriteBufSize;
       }
-      generateRandomDataToBuffer(mWriteBuf, 0, n);
+      generateRandomDataToBuffer(mWriteBuf, 0, (int)n);
       try {
-        dstStream.write(mWriteBuf, 0, n);
+        dstStream.write(mWriteBuf, 0, (int)n);
       } catch (IOException e) {
+        LOG.error("caught exception");
+        break;
       }
-      remnant -= n;
+      pos += n;
     }
   }
   

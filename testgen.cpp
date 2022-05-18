@@ -94,9 +94,12 @@ public:
 void test_SimpleWrite(int filesPerThread, long fileSize, double compressFactor)
 {
     Config conf;
+    conf.insert("block.size.bytes", 128*1024*1024);
+    conf.insert("buffer.size.bytes", 4*1024*1024);
     conf.insert("files.per.thread", filesPerThread);
     conf.insert("file.compression.factor", compressFactor);
     conf.insert("file.length.bytes", fileSize);
+    conf.insert("write.type", "ASYNC_THROUGH");
     
     std::stringstream ss;
     ss << "conf/testsuite/SimpleWrite";

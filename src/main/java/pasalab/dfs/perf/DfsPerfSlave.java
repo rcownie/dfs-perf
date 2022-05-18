@@ -24,6 +24,7 @@ public class DfsPerfSlave {
       nodeName = args[0];
       taskId = Integer.parseInt(args[1]);
       testCase = args[2];
+      LOG.info("DfsPerfSlave.main nodeName " + nodeName + " taskId " + taskId + " testCase " + testCase);
     } catch (Exception e) {
       LOG.error("Failed to parse the input args", e);
       System.exit(-1);

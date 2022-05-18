@@ -45,6 +45,7 @@ public class TestCase {
   }
 
   private TestCase(String xmlFileName) throws Exception {
+    LOG.info("new TestCase xmlFileName " + xmlFileName);
     SAXParserFactory spf = SAXParserFactory.newInstance();
     SAXParser saxParser = spf.newSAXParser();
     File xmlFile = new File(xmlFileName);
@@ -64,7 +65,9 @@ public class TestCase {
    * @throws Exception
    */
   public PerfTask getTaskClass(String type) throws Exception {
+    LOG.info("getTaskClass " + type);
     String taskClassName = mTaskClasses.get(substringBeforeUnderscore(type));
+    LOG.info("getTaskClass type " + type + " taskClassName " + taskClassName);
     return (PerfTask) Class.forName(taskClassName).newInstance();
   }
 
@@ -88,6 +91,7 @@ public class TestCase {
    * @throws Exception
    */
   public PerfThread getTaskThreadClass(String type) throws Exception {
+  
     String taskThreadClassName = mTaskThreadClasses.get(substringBeforeUnderscore(type));
     return (PerfThread) Class.forName(taskThreadClassName).newInstance();
   }
