@@ -25,6 +25,9 @@ NODELIST=$DFS_PERF_CONF_DIR/slaves
 taskid=0
 SLAVES=`sort "$NODELIST"|sed  "s/#.*$//;/^$/d"`
 UNIQ_SLAVES=`sort "$NODELIST" | uniq | sed  "s/#.*$//;/^$/d"`
+
+echo "DEBUG: UNIQ_SLAVES=${UNIQ_SLAVES}"
+
 for slave in $UNIQ_SLAVES; do
   echo -n "Copy configurations to $slave... "
   scp $DFS_PERF_CONF_DIR/dfs-perf-env.sh $slave:$DFS_PERF_CONF_DIR/dfs-perf-env.sh

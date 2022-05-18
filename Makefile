@@ -3,7 +3,7 @@
 
 VERSION :=0.1.1
 
-all: jar
+all: jar testgen
 
 clean:
 	mvn clean
@@ -21,3 +21,10 @@ package:
 	  dfs-perf/bin \
 	  dfs-perf/conf \
 	  dfs-perf/libexec
+
+testgen: testgen.cpp
+	g++ -o $@ -std=c++11 -O2 testgen.cpp
+
+cluster:
+	ssh_cluster cat < dfs-perf-${VERSION}.tgz ">" dfs-perf-${VERSION}.tgz
+
