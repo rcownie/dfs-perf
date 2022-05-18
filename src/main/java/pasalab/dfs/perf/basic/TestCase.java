@@ -35,6 +35,14 @@ public class TestCase {
   private Map<String, String> mTaskContextClasses;
   private Map<String, String> mTaskThreadClasses;
   private Map<String, String> mTotalReportClasses;
+  
+  private String substringBeforeUnderscore(String str) throws Exception {
+    int idx = str.indexOf("_");
+    if (idx >= 0) {
+      return str.substring(0, idx);
+    }
+    return str;
+  }
 
   private TestCase(String xmlFileName) throws Exception {
     SAXParserFactory spf = SAXParserFactory.newInstance();
@@ -56,7 +64,7 @@ public class TestCase {
    * @throws Exception
    */
   public PerfTask getTaskClass(String type) throws Exception {
-    String taskClassName = mTaskClasses.get(type);
+    String taskClassName = mTaskClasses.get(substringBeforeUnderscore(type));
     return (PerfTask) Class.forName(taskClassName).newInstance();
   }
 
@@ -68,7 +76,7 @@ public class TestCase {
    * @throws Exception
    */
   public PerfTaskContext getTaskContextClass(String type) throws Exception {
-    String taskContextClassName = mTaskContextClasses.get(type);
+    String taskContextClassName = mTaskContextClasses.get(substringBeforeUnderscore(type));
     return (PerfTaskContext) Class.forName(taskContextClassName).newInstance();
   }
 
@@ -80,7 +88,7 @@ public class TestCase {
    * @throws Exception
    */
   public PerfThread getTaskThreadClass(String type) throws Exception {
-    String taskThreadClassName = mTaskThreadClasses.get(type);
+    String taskThreadClassName = mTaskThreadClasses.get(substringBeforeUnderscore(type));
     return (PerfThread) Class.forName(taskThreadClassName).newInstance();
   }
 
@@ -94,7 +102,7 @@ public class TestCase {
    * @throws Exception
    */
   public PerfTotalReport getTotalReportClass(String type) throws Exception {
-    String totalReportClassName = mTotalReportClasses.get(type);
+    String totalReportClassName = mTotalReportClasses.get(substringBeforeUnderscore(type));
     return (PerfTotalReport) Class.forName(totalReportClassName).newInstance();
   }
 }

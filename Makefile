@@ -14,7 +14,7 @@ compile:
 
 jar: compile
 
-package:
+package: jar
 	cd .. ; \
 	tar cvfz dfs-perf/dfs-perf-${VERSION}.tgz \
 	  dfs-perf/target/dfs-perf-0.1.0-SNAPSHOT-jar-with-dependencies.jar \

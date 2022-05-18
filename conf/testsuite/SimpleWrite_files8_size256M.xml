@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<configuration>
+  <property>
+    <name>file.compression.factor</name>
+    <value>1</value>
+    <description>compressibility of generated file data</description>
+  </property>
+  <property>
+    <name>file.length.bytes</name>
+    <value>268435456</value>
+    <description>the file size in bytes</description>
+  </property>
+  <property>
+    <name>files.per.thread</name>
+    <value>8</value>
+    <description>the number of files to write for each write thread</description>
+  </property>
+</configuration>
