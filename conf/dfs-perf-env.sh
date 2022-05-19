@@ -7,10 +7,8 @@ fi
 
 workers_num=`wc -l ${DFS_PERF_HOME}/conf/slaves | cut -d ' ' -f1`
 
-if [ -z "${DFS_PERF_THREADS_NUM}" ]; then
-  # The number of PerfThread's in each slave process
-  export DFS_PERF_THREADS_NUM=1
-fi
+# This will be modified as necessary by higher-level script
+export DFS_PERF_THREADS_NUM=1
 
 if [ -z "${DFS_PERF_WORKSPACE}" ]; then
   # Choose the directory for the benchmark files

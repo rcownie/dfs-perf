@@ -1,5 +1,39 @@
 #!/usr/bin/env bash
 
+# This will be auto-edited to substitute the desired value
+export DFS_PERF_MASTER_HOSTNAME=DFS_PERF_MASTER_HOSTNAME_placeholder
+
+# This will be auto-edited to substitute the desired value
+export DFS_PERF_THREADS_NUM=DFS_PERF_THREADS_NUM=DFS_PERF_THREADS_NUM_placeholder
+
+# The number of workers is the line count of conf/slaves
+workers_num=`wc -l ${DFS_PERF_HOME}/conf/slaves | cut -d ' ' -f1`
+
+# Pad to 3 digits with leading zero's
+if [ ${workers_num} -lt 10 ]; then
+  workers_num="00${workers_num}"
+elif [ ${workers_num} -lt 100 ]; then
+  workers_num="0${workers_num}"
+fi
+
+# Pad to 2 digits with a leading zero
+threads_num=${DFS_PERF_THREADS_NUM}
+if [ ${threads_num} -lt 10 ]; then
+  threads_num="0${threads_num}"
+fi
+
+if [ -z "${DFS_PERF_WORKSPACE}" ]; then
+  # Choose the directory for the benchmark files
+  export DFS_PERF_WORKSPACE="/flexfs/base/workspace"
+fi
+
+# Choose the master node IP address
+DFS_PERF_MASTER_PORT=23333
+
+# The report output path
+
+export DFS_PERF_OUT_DIR="$DFS_PERF_HOME/result_w${workers_num}_t${threads_num}"
+
 # The following gives an example:
 
 if [[ `uname -a` == Darwin* ]]; then
@@ -9,27 +43,17 @@ if [[ `uname -a` == Darwin* ]]; then
 else
   # Assuming Linux
   if [ -z "$JAVA_HOME" ]; then
-    export JAVA_HOME=/usr/lib/jvm/java-7-oracle
+    if [ -d "/usr/lib/jvm/java" ]; then
+      export JAVA_HOME=/usr/lib/jvm/java
+    else
+      export JAVA_HOME=/usr/lib/jvm/default-java
+    fi
   fi
 fi
 
 export JAVA="$JAVA_HOME/bin/java"
 
-#the DFS Master address
-export DFS_PERF_DFS_ADDRESS="dfs://master:port"
-
-#the workspace dir in DFS
-export DFS_PERF_WORKSPACE="/tmp/dfs-perf-workspace"
-
-#the report output path
-export DFS_PERF_OUT_DIR="$DFS_PERF_HOME/result"
-
-#the dfs-perf master service address
-DFS_PERF_MASTER_HOSTNAME="master"
-DFS_PERF_MASTER_PORT=23333
-
-#the threads num
-DFS_PERF_THREADS_NUM=1
+export DFS_PERF_DFS_ADDRESS="file://";
 
 #the slave is considered to be failed if not register in this time
 DFS_PERF_UNREGISTER_TIMEOUT_MS=10000

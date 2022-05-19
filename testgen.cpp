@@ -91,6 +91,14 @@ public:
     }
 };
 
+template <typename T>
+std::string format(const char* fmt, T val)
+{
+    char buf[512];
+    sprintf(buf, fmt, val);
+    return std::string(buf);
+}
+
 void test_SimpleWrite(int filesPerThread, long fileSize, double compressFactor)
 {
     Config conf;
@@ -103,12 +111,10 @@ void test_SimpleWrite(int filesPerThread, long fileSize, double compressFactor)
     
     std::stringstream ss;
     ss << "conf/testsuite/SimpleWrite";
-    ss << "_files" << filesPerThread;
-    ss << "_size" << (fileSize>>20) << "M";
+    ss << "_size" << format("%04dM", fileSize>>20);
+    ss << "_files" << format("%03d", filesPerThread);
     if (compressFactor != 1.00) {
-        char buf[32];
-        sprintf(buf, "%4.2f", compressFactor);
-        ss << "_z" << buf;
+        ss << "_z" << format("%4.2f", compressFactor);
     }
     ss << ".xml";
     
@@ -118,24 +124,70 @@ void test_SimpleWrite(int filesPerThread, long fileSize, double compressFactor)
     out.close();
 }
 
-void test_SimpleRead()
+void test_SimpleRead(int filesPerThread, long fileSize, double compressFactor, bool isCold, bool isRandom)
 {
+    Config conf;
+    conf.insert("buffer.size.bytes", 4*1024*1024);
+    conf.insert("files.per.thread", filesPerThread);
+    conf.insert("read.mode", isRandom ? "RANDOM" : "SEQUENCE");
+    conf.insert("read.type", "CACHE_PROMOTE");
+    
+    std::stringstream ss;
+    ss << "conf/testsuite/SimpleRead";
+    ss << "_size" << format("%04dM", fileSize>>20);
+    ss << "_files" << format("%03d", filesPerThread);
+    if (compressFactor != 1.00) {
+        ss << "_z" << format("%4.2f", compressFactor);
+    }
+    if (isRandom) {
+        ss << "_rnd";
+    }
+    if (isCold) {
+        ss << "_cold";
+    }
+    ss << ".xml";
+    
+    std::ofstream out;
+    out.open(ss.str(), std::ofstream::out);
+    conf.print(out);
+    out.close();
 }
 
 int main(int argc, char* argv[])
 {
-    long maxFilesPerThread = 1024;
-    long maxMBPerThread = 8*1024;
-    long minFileSizeMB = 1;
-
+    long M = (1024*1024);
+    
     // write lots of small files    
-    test_SimpleWrite(512, 1<<20, 1.00);
-    // write 2GB of data per thread in various ways
-    test_SimpleWrite(128, 16<<20, 1.00);
-    test_SimpleWrite(64,  32<<20, 1.00);
-    test_SimpleWrite(32,  64<<20, 1.00);
-    test_SimpleWrite(16, 128<<20, 1.00);
-    test_SimpleWrite(8,  256<<20, 1.00);
-    test_SimpleWrite(4,  512<<20, 1.00);
+    test_SimpleWrite(512, 1*M, 1.00);
+    
+    // write 8 files per thread w/ varying file size
+    test_SimpleWrite(8, 16*M,   1.00);
+    test_SimpleWrite(8, 64*M,   1.00);
+    test_SimpleWrite(8, 256*M,  1.00);
+    test_SimpleWrite(8, 1024*M, 1.00);
+    test_SimpleWrite(8, 4096*M, 1.00);
+
+    // write 8 x 1GB files w/ varying compression
+    test_SimpleWrite(8, 1024*M, 1.50);
+    test_SimpleWrite(8, 1024*M, 2.00);
+    test_SimpleWrite(8, 1024*M, 2.50);
+    test_SimpleWrite(8, 1024*M, 3.00);
+    test_SimpleWrite(8, 1024*M, 4.00);
+    
+    for (int flags = 0x0; flags <= 0x3; ++flags) {
+      test_SimpleRead(512, 1*M,  1.00, flags&0x2, flags&0x1);
+      test_SimpleRead(8, 16*M,   1.00, flags&0x2, flags&0x1);
+      test_SimpleRead(8, 64*M,   1.00, flags&0x2, flags&0x1);
+      test_SimpleRead(8, 256*M,  1.00, flags&0x2, flags&0x1);
+      test_SimpleRead(8, 1024*M, 1.00, flags&0x2, flags&0x1);
+      test_SimpleRead(8, 4096*M, 1.00, flags&0x2, flags&0x1);
+      
+      test_SimpleRead(8, 1024*M, 1.50, flags&0x2, flags&0x1);
+      test_SimpleRead(8, 1024*M, 2.00, flags&0x2, flags&0x1);
+      test_SimpleRead(8, 1024*M, 2.50, flags&0x2, flags&0x1);
+      test_SimpleRead(8, 1024*M, 3.00, flags&0x2, flags&0x1);
+      test_SimpleRead(8, 1024*M, 4.00, flags&0x2, flags&0x1);
+    }
+    
     return 0;
 }
