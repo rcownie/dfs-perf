@@ -23,24 +23,40 @@ do
     < ${DFS_PERF}/conf/dfs-perf-env.sh.orig \
     > ${DFS_PERF}/conf/dfs-perf-env.sh
   
-  for test in \
-SimpleWrite_files008_size0016M \
-SimpleWrite_files008_size0064M \
-SimpleWrite_files008_size0256M \
-SimpleWrite_files008_size1024M \
-SimpleWrite_files008_size1024M_z1.50 \
-SimpleWrite_files008_size1024M_z2.00 \
-SimpleWrite_files008_size1024M_z2.50 \
-SimpleWrite_files008_size1024M_z3.00 \
-SimpleWrite_files008_size1024M_z4.00 \
-SimpleWrite_files008_size4096M \
-SimpleWrite_files512_size0001M    
+  for params in \
+size0001M_files512 \
+size0016M_files008 \
+size0064M_files008 \
+size0256M_files008 \
+size1024M_files008 \
+size4096M_files008 \
+size1024M_files008_z1.50 \
+size1024M_files008_z2.00 \
+size1024M_files008_z2.50 \
+size1024M_files008_z3.00 \
+size1024M_files008_z4.00
   do
     echo -n "TIME: ${test} begin at " ; date
     ${BIN}/dfs-perf-clean
-    ${BIN}/dfs-perf ${test}
-    ${BIN}/dfs-perf-collect ${test}
-    echo -N "TIME: ${test} end   at " ; date
+
+    echo -n "TIME: SimpleWrite_${test} begin at " ; date
+    ${BIN}/dfs-perf SimpleWrite_${test}
+    ${BIN}/dfs-perf-collect SimpleWrite_${test}
+
+    echo -n "TIME: SimpleRead_${test} begin at " ; date
+    ${BIN}/dfs-perf SimpleRead_${test}
+    ${BIN}/dfs-perf-collect SimpleRead_${test}
+
+    echo -n "TIME: umount/mount begin at " ; date
+    # Unmount and re-mount filesystem to get cold-read performance
+    dsh -a "sudo umount /flexfs/base"
+    dsh -a "sudo mount /flexfs/base"
+
+    echo -n "TIME: SimpleRead_${test}_cold begin at " ; date
+    ${BIN}/dfs-perf SimpleRead_${test}_cold
+    ${BIN}/dfs-perf-collect SimpleRead_${test}_cold  
+
+    echo -n "TIME: ${test} end   at " ; date
   done
   
   mv -f ${DFS_PERF}/conf/dfs-perf-env.sh.orig ${DFS_PERF}/conf/dfs-perf-env.sh

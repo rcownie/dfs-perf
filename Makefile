@@ -25,13 +25,15 @@ package: jar testgen
 	  > conf/dfs-perf-env.sh
 	testgen
 	cd .. ; \
-	tar cvfz dfs-perf/package.tgz \
+	tar cfz dfs-perf/package.tgz \
 	  dfs-perf/target/dfs-perf-0.1.0-SNAPSHOT-jar-with-dependencies.jar \
 	  dfs-perf/bin \
 	  dfs-perf/conf \
 	  dfs-perf/libexec
 
 cluster_any: package
+	ssh_cluster cat < package.tgz ">" package.tgz
+	ssh_cluster tar xfz package.tgz
 
 cluster_00 cluster_off:
 	ssh_cluster ./autoscale.sh 0

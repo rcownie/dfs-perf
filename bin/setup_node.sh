@@ -54,5 +54,8 @@ grep benchmark-plus /etc/fstab >/dev/null || \
 
 echo "Mount flexfs volumes ..."
 sudo mount /flexfs/base
-sudo mount /flexfs/plus
+#sudo mount /flexfs/plus
+
+exit 0
+
 
