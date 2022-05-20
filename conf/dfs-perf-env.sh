@@ -1,14 +1,26 @@
 #!/usr/bin/env bash
 
-# These environment variables maybe set by an outer script
-if [ -z "${DFS_PERF_MASTER_HOSTNAME}" ]; then
-  export DFS_PERF_MASTER_HOSTNAME="172.30.0.194";
-fi
+# This will be auto-edited to substitute the desired value
+export DFS_PERF_MASTER_HOSTNAME=172.30.0.194
 
+# This will be auto-edited to substitute the desired value
+export DFS_PERF_THREADS_NUM=DFS_PERF_THREADS_NUM_placeholder
+
+# The number of workers is the line count of conf/slaves
 workers_num=`wc -l ${DFS_PERF_HOME}/conf/slaves | cut -d ' ' -f1`
 
-# This will be modified as necessary by higher-level script
-export DFS_PERF_THREADS_NUM=1
+# Pad to 3 digits with leading zero's
+if [ ${workers_num} -lt 10 ]; then
+  workers_num="00${workers_num}"
+elif [ ${workers_num} -lt 100 ]; then
+  workers_num="0${workers_num}"
+fi
+
+# Pad to 2 digits with a leading zero
+threads_num=${DFS_PERF_THREADS_NUM}
+if [ ${threads_num} -lt 10 ]; then
+  threads_num="0${threads_num}"
+fi
 
 if [ -z "${DFS_PERF_WORKSPACE}" ]; then
   # Choose the directory for the benchmark files
@@ -20,7 +32,7 @@ DFS_PERF_MASTER_PORT=23333
 
 # The report output path
 
-export DFS_PERF_OUT_DIR="$DFS_PERF_HOME/results_w${workers_num}_t${DFS_PERF_THREADS_NUM}"
+export DFS_PERF_OUT_DIR="$DFS_PERF_HOME/result_w${workers_num}_t${threads_num}"
 
 # The following gives an example:
 

@@ -2,10 +2,10 @@
 .PHONY: all clean cluster compile distribute jar package
 
 VERSION :=0.1.1
-DFS_PERF_MASTER_IP :=172.30.0.194
+DFS_PERF_MASTER_HOSTNAME :=172.30.0.194
 
 # ssh_cluster should talk to the master node in the cluster
-DFS_PERF_MASTER_IP :=$(shell ssh_cluster hostname)
+#DFS_PERF_MASTER_HOSTNAME :=$(shell ssh_cluster hostname)
 
 all: jar testgen
 
@@ -20,7 +20,7 @@ jar: compile
 
 
 package: jar testgen
-	sed s/DFS_PERF_MASTER_IP_placeholder/${DFS_PERF_MASTER_IP}/ \
+	sed s/DFS_PERF_MASTER_HOSTNAME_placeholder/${DFS_PERF_MASTER_HOSTNAME}/ \
 	  < conf/dfs-perf-env.sh.template \
 	  > conf/dfs-perf-env.sh
 	testgen
