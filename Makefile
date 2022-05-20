@@ -10,11 +10,11 @@ DFS_PERF_MASTER_HOSTNAME :=172.30.0.194
 all: jar testgen
 
 clean:
-	mvn clean
+	mvn -q clean
 	-rm -f dfs-perf-${VERSION}.tgz
 
 compile:
-	mvn install
+	mvn -q install
 
 jar: compile
 
@@ -52,6 +52,12 @@ cluster_08: cluster_any
 
 cluster_16: cluster_any
 	ssh_cluster dfs-perf/bin/setup_cluster.sh 16
+
+cluster_32: cluster_any
+	ssh_cluster dfs-perf/bin/setup_cluster.sh 32
+
+cluster_64: cluster_any
+	ssh_cluster dfs-perf/bin/setup_cluster.sh 64
 
 testgen: testgen.cpp
 	g++ -o $@ -std=c++11 -O2 testgen.cpp

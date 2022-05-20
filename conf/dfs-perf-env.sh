@@ -6,8 +6,13 @@ export DFS_PERF_MASTER_HOSTNAME=172.30.0.194
 # This will be auto-edited to substitute the desired value
 export DFS_PERF_THREADS_NUM=DFS_PERF_THREADS_NUM_placeholder
 
+# Default value for DFS_PERF_THREADS_NUM
+if [ ${DFS_PERF_THREADS_NUM} = "DFS_PERF_THREADS_NUM_placeholder" ]; then
+  export DFS_PERF_THREADS_NUM=1
+fi
+
 # The number of workers is the line count of conf/slaves
-workers_num=`wc -l ${DFS_PERF_HOME}/conf/slaves | cut -d ' ' -f1`
+workers_num=`cat ${DFS_PERF_HOME}/conf/slaves | wc -l`
 
 # Pad to 3 digits with leading zero's
 if [ ${workers_num} -lt 10 ]; then
@@ -18,9 +23,12 @@ fi
 
 # Pad to 2 digits with a leading zero
 threads_num=${DFS_PERF_THREADS_NUM}
-if [ ${threads_num} -lt 10 ]; then
-  threads_num="0${threads_num}"
-fi
+for padded in 01 02 03 04 05 06 07 08 09
+do
+  if [ ${threads_num} -eq ${padded} ]; then
+    threads_num=${padded}
+  fi
+done
 
 if [ -z "${DFS_PERF_WORKSPACE}" ]; then
   # Choose the directory for the benchmark files

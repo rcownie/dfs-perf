@@ -12,7 +12,7 @@ export DFS_PERF_SLAVES_NUM=`wc -l ${DFS_PERF}/conf/slaves | cut -d ' ' -f1`
 
 echo "DFS_PERF_SLAVES_NUM=${DFS_PERF_SLAVES_NUM}"
 
-for threads in 1 4 8 16 64
+for threads in 1 4 16 32
 do
   # The DFS_PERF_THREADS_NUM is distributed to the slaves by copying
   # the dfs-perf-env.sh script.  This ugly hack edits that script on
@@ -32,8 +32,6 @@ size1024M_files008 \
 size4096M_files008 \
 size1024M_files008_z1.50 \
 size1024M_files008_z2.00 \
-size1024M_files008_z2.50 \
-size1024M_files008_z3.00 \
 size1024M_files008_z4.00
   do
     echo -n "TIME: ${params} begin at " ; date
@@ -47,14 +45,14 @@ size1024M_files008_z4.00
     ${BIN}/dfs-perf SimpleRead_${params}
     ${BIN}/dfs-perf-collect SimpleRead_${params}
 
-    #echo -n "TIME: umount/mount begin at " ; date
+    echo -n "TIME: umount/mount begin at " ; date
     # Unmount and re-mount filesystem to get cold-read performance
-    #dsh -a -c -F 20 "sudo umount /flexfs/base"
-    #dsh -a -c -F 20 "sudo mount /flexfs/base"
+    dsh -a -c -F 20 "sudo umount /flexfs/base"
+    dsh -a -c -F 20 "sudo mount /flexfs/base"
 
-    #echo -n "TIME: SimpleRead_${params}_cold begin at " ; date
-    #${BIN}/dfs-perf SimpleRead_${params}_cold
-    #${BIN}/dfs-perf-collect SimpleRead_${params}_cold  
+    echo -n "TIME: SimpleRead_${params}_cold begin at " ; date
+    ${BIN}/dfs-perf SimpleRead_${params}_cold
+    ${BIN}/dfs-perf-collect SimpleRead_${params}_cold  
 
     echo -n "TIME: ${test} end   at " ; date
   done

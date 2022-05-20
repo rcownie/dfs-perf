@@ -6,6 +6,11 @@ export DFS_PERF_MASTER_HOSTNAME=DFS_PERF_MASTER_HOSTNAME_placeholder
 # This will be auto-edited to substitute the desired value
 export DFS_PERF_THREADS_NUM=DFS_PERF_THREADS_NUM_placeholder
 
+# Default value for DFS_PERF_THREADS_NUM
+if [ ${DFS_PERF_THREADS_NUM} = "DFS_PERF_THREADS_NUM_placeholder" ]; then
+  export DFS_PERF_THREADS_NUM=1
+fi
+
 # The number of workers is the line count of conf/slaves
 workers_num=`cat ${DFS_PERF_HOME}/conf/slaves | wc -l`
 

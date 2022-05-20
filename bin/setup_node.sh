@@ -8,12 +8,12 @@ fi
 
 if [ ! -d /usr/lib/jvm/default-java ]; then
   echo "Install default-jre-headless ..."
-  sudo $packageManager install default-jre-headless
+  sudo $packageManager install default-jre-headless >&/tmp/install.log
 fi
 
 if [ ! -x /usr/bin/fusermount ]; then
   echo "Install fuse3 ..."
-  sudo $packageManager install fuse3
+  sudo $packageManager install fuse3 >>/tmp/install.log
 fi
 
 if [ ! -f /sbin/mount.flexfs ]; then
@@ -52,9 +52,14 @@ grep benchmark-base /etc/fstab >/dev/null || \
 grep benchmark-plus /etc/fstab >/dev/null || \
   sudo echo "benchmark-plus /flexfs/plus flexfs _netdev,nofail,noauto 0 0" >>/etc/fstab
 
-echo "Mount flexfs volumes ..."
-sudo mount /flexfs/base
-#sudo mount /flexfs/plus
+if [ -z "`df /flexfs/base | grep flexfs:`" ]; then
+  echo "mount /flexfs/base ..."
+  sudo mount /flexfs/base
+fi
+#if [ -z "`df /flexfs/plus | grep flexfs:`" ]; then
+#  echo "mount /flexfs/plus ..."
+#  sudo mount /flexfs/plus
+#fi
 
 exit 0
 
