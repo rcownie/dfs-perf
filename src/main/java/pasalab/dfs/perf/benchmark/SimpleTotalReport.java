@@ -51,7 +51,7 @@ public class SimpleTotalReport extends PerfTotalReport {
       sbSlaveDetail.append(slaveName).append("'s ").append(entry.getKey())
           .append(" for each threads:\n\t");
       for (Double d : entry.getValue()) {
-        sbSlaveDetail.append("[ ").append(d).append(" ]");
+        sbSlaveDetail.append("[ ").append(String.format("%.3f, d)).append(" ]");
       }
       sbSlaveDetail.append("\n");
     }
@@ -88,14 +88,14 @@ public class SimpleTotalReport extends PerfTotalReport {
         for (Double d : threadDetails) {
           sum += d;
         }
-        sbStatistics.append("\t").append(sum);
+        sbStatistics.append("\t").append(String.format("%.3f", sum));
         totals.set(t, totals.get(t) + sum);
       }
       sbStatistics.append("\n");
     }
     sbStatistics.append("Total");
     for (Double total : totals) {
-      sbStatistics.append("\t").append(total);
+      sbStatistics.append("\t").append(String.format("%.3f", total));
     }
     sbStatistics.append("\n");
     return sbStatistics.toString();

@@ -7,7 +7,7 @@ export DFS_PERF_MASTER_HOSTNAME=172.30.0.194
 export DFS_PERF_THREADS_NUM=DFS_PERF_THREADS_NUM_placeholder
 
 # Default value for DFS_PERF_THREADS_NUM
-if [ ${DFS_PERF_THREADS_NUM} = "DFS_PERF_THREADS_NUM_placeholder" ]; then
+if [ ${DFS_PERF_THREADS_NUM} = "DFS_PERF_THREADS_NUM""_placeholder" ]; then
   export DFS_PERF_THREADS_NUM=1
 fi
 

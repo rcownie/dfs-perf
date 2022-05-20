@@ -8,7 +8,7 @@ fi
 
 if [ ! -d /usr/lib/jvm/default-java ]; then
   echo "Install default-jre-headless ..."
-  sudo $packageManager install default-jre-headless >&/tmp/install.log
+  sudo $packageManager install default-jre-headless >/tmp/install.log 2>&1
 fi
 
 if [ ! -x /usr/bin/fusermount ]; then

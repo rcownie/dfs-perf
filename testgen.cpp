@@ -167,8 +167,18 @@ int main(int argc, char* argv[])
     test_SimpleWrite(8, 1024*M, 1.00);
     test_SimpleWrite(8, 4096*M, 1.00);
 
-    test_SimpleWrite(1, 2048*M, 1.00);
-
+    test_SimpleWrite(1, 8*M,    1.33);
+    test_SimpleWrite(1, 32*M,   1.33);
+    test_SimpleWrite(1, 128*M,  1.33);
+    test_SimpleWrite(1, 512*M,  1.33);
+    test_SimpleWrite(1, 2048*M, 1.33);
+    
+    test_SimpleRead(1,  8*M,    1.33, true, false);
+    test_SimpleRead(1,  32*M,   1.33, true, false);
+    test_SimpleRead(1,  128*M,  1.33, true, false);
+    test_SimpleRead(1,  512*M,  1.33, true, false);
+    test_SimpleRead(1,  2048*M, 1.33, true, false);
+    
     // write 8 x 1GB files w/ varying compression
     test_SimpleWrite(8, 1024*M, 1.50);
     test_SimpleWrite(8, 1024*M, 2.00);
