@@ -30,6 +30,7 @@ echo "DEBUG: UNIQ_SLAVES=${UNIQ_SLAVES}"
 
 for slave in $UNIQ_SLAVES; do
   echo -n "Copy configurations to $slave... "
+  scp $DFS_PERF_CONF_DIR/slaves $slave:$DFS_PERF_CONF_DIR/slaves
   scp $DFS_PERF_CONF_DIR/dfs-perf-env.sh $slave:$DFS_PERF_CONF_DIR/dfs-perf-env.sh
   scp $DFS_PERF_CONF_DIR/testsuite/$1.xml $slave:$DFS_PERF_CONF_DIR/testsuite/$1.xml
   sleep 0.02
