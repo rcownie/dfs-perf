@@ -26,8 +26,6 @@ taskid=0
 SLAVES=`sort "$NODELIST"|sed  "s/#.*$//;/^$/d"`
 UNIQ_SLAVES=`sort "$NODELIST" | uniq | sed  "s/#.*$//;/^$/d"`
 
-echo "DEBUG: UNIQ_SLAVES=${UNIQ_SLAVES}"
-
 for slave in $UNIQ_SLAVES; do
   echo -n "Copy configurations to $slave... "
   scp $DFS_PERF_CONF_DIR/slaves $slave:$DFS_PERF_CONF_DIR/slaves >/dev/null &
@@ -40,7 +38,7 @@ wait
 for slave in $UNIQ_SLAVES; do
   slavenum=`echo $SLAVES | grep -o "$slave" | wc -l`
   lasttaskid=`expr $taskid + $slavenum - 1`
-  echo -n "Connect to $slave... "
+  # echo -n "Connect to $slave... "
   ssh -o ConnectTimeout=5 -o StrictHostKeyChecking=no -t $slave $bin/dfs-perf-start.sh $slave $taskid $lasttaskid $1 2>&1
   sleep 0.02
   taskid=`expr $lasttaskid + 1`

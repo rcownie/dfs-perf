@@ -51,7 +51,7 @@ public class SimpleTotalReport extends PerfTotalReport {
       sbSlaveDetail.append(slaveName).append("'s ").append(entry.getKey())
           .append(" for each threads:\n\t");
       for (Double d : entry.getValue()) {
-        sbSlaveDetail.append("[ ").append(String.format("%.3f, d)).append(" ]");
+        sbSlaveDetail.append("[ ").append(String.format("%.3f", d)).append(" ]");
       }
       sbSlaveDetail.append("\n");
     }
