@@ -36,7 +36,12 @@ done
 wait
 
 for slave in $UNIQ_SLAVES; do
-  slavenum=`echo $SLAVES | grep -o "$slave" | wc -l`
+  slavenum=0
+  for m in $SLAVES; do
+    if [ $m = $slave ]; then
+      slavenum=`expr $slavenum + 1`
+    fi
+  done
   lasttaskid=`expr $taskid + $slavenum - 1`
   # echo -n "Connect to $slave... "
   ssh -o ConnectTimeout=5 -o StrictHostKeyChecking=no -t $slave \
@@ -46,14 +51,8 @@ for slave in $UNIQ_SLAVES; do
 done
 wait
 
-SLAVES_WITH_SPACES=""
-for s in ${SLAVES}
-do
-  SLAVES_WITH_SPACES="${SLAVES_WITH_SPACES} ${s}"
-done
-
 $JAVA -cp $DFS_PERF_CONF_DIR/:$DFS_PERF_JAR \
   -Dpasalab.dfs.perf.home=$DFS_PERF_HOME \
   -Dpasalab.dfs.perf.logger.type="PERF_MASTER_LOGGER" \
   -Dlog4j.configuration=file:$DFS_PERF_CONF_DIR/log4j.properties \
-  $DFS_PERF_JAVA_OPTS pasalab.dfs.perf.DfsPerfMaster $taskid $SLAVES_WITH_SPACES $1
+  $DFS_PERF_JAVA_OPTS pasalab.dfs.perf.DfsPerfMaster $taskid $SLAVES $1
