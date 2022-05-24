@@ -48,8 +48,12 @@ public class DfsPerfSlave {
         Thread.sleep(100);
       }
       if (!task.run(taskContext)) {
+        LOG.info("nodeName " + nodeName + " task.run returned false");
         masterClient.slave_finish(taskId, nodeName, false);
       } else {
+        if (!taskContext.getSuccess()) {
+          LOG.info("nodeName " + nodeName + " getSuccess returned false");
+        }
         masterClient.slave_finish(taskId, nodeName,
             task.cleanup(taskContext) & taskContext.getSuccess());
       }

@@ -59,6 +59,12 @@ cluster_32: cluster_any
 cluster_64: cluster_any
 	ssh_cluster dfs-perf/bin/setup_cluster.sh 64
 
+cluster_128: cluster_any
+	ssh_cluster dfs-perf/bin/setup_cluster.sh 128
+
+cluster_256: cluster_any
+	ssh_cluster dfs-perf/bin/setup_cluster.sh 256
+
 testgen: testgen.cpp
 	g++ -o $@ -std=c++11 -O2 testgen.cpp
 
